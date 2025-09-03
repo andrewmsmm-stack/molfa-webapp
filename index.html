@@ -1,0 +1,386 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Тест: Чи є у тебе здібності?</title>
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Arial', sans-serif;
+            background: linear-gradient(135deg, #1a4c2e 0%, #2d7a47 50%, #1e5233 100%);
+            background-attachment: fixed;
+            margin: 0;
+            padding: 20px;
+            min-height: 100vh;
+            color: #ffffff;
+        }
+        
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: rgba(26, 76, 46, 0.9);
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        
+        .header h1 {
+            color: #ffffff;
+            font-size: 2.2em;
+            margin: 0 0 10px 0;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+        }
+        
+        .quiz-container {
+            display: none;
+        }
+        
+        .quiz-container.active {
+            display: block;
+        }
+        
+        .question {
+            background: linear-gradient(135deg, rgba(45, 122, 71, 0.8) 0%, rgba(26, 76, 46, 0.9) 100%);
+            color: white;
+            padding: 25px;
+            border-radius: 15px;
+            margin-bottom: 25px;
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .question h3 {
+            margin: 0 0 20px 0;
+            font-size: 1.3em;
+            line-height: 1.4;
+        }
+        
+        .options {
+            display: grid;
+            gap: 15px;
+        }
+        
+        .option {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            padding: 15px;
+            border-radius: 10px;
+            color: white;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-align: left;
+            font-size: 1em;
+        }
+        
+        .option:hover {
+            background: rgba(255, 255, 255, 0.2);
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(255, 255, 255, 0.1);
+        }
+        
+        .option.selected {
+            background: rgba(255, 255, 255, 0.3);
+            border-color: rgba(255, 255, 255, 0.5);
+            box-shadow: 0 0 20px rgba(255, 255, 255, 0.2);
+        }
+        
+        .navigation {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 30px;
+        }
+        
+        .btn {
+            padding: 12px 30px;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            border-radius: 25px;
+            cursor: pointer;
+            font-size: 1em;
+            font-weight: bold;
+            transition: all 0.3s ease;
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+        }
+        
+        .btn:hover {
+            background: rgba(255, 255, 255, 0.2);
+            transform: translateY(-2px);
+        }
+        
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+        
+        .progress-bar {
+            width: 100%;
+            height: 8px;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 4px;
+            margin: 20px 0;
+            overflow: hidden;
+        }
+        
+        .progress {
+            height: 100%;
+            background: linear-gradient(90deg, #4CAF50 0%, #8BC34A 100%);
+            transition: width 0.3s ease;
+            border-radius: 4px;
+        }
+        
+        .start-screen, .result-screen {
+            text-align: center;
+            padding: 40px 20px;
+        }
+        
+        .mystical-icon {
+            font-size: 4em;
+            margin-bottom: 20px;
+            animation: float 3s ease-in-out infinite;
+        }
+        
+        @keyframes float {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-15px); }
+        }
+        
+        .question-counter {
+            color: rgba(255, 255, 255, 0.8);
+            font-size: 1.1em;
+            font-weight: 600;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div class="mystical-icon">🔮</div>
+            <h1>Чи є у тебе здібності?</h1>
+        </div>
+
+        <div id="startScreen" class="start-screen">
+            <p style="font-size: 1.2em; margin-bottom: 30px; opacity: 0.9;">
+                Дізнайся про свої приховані здібності через 20 запитань
+            </p>
+            <button class="btn" onclick="startQuiz()">Розпочати тест</button>
+        </div>
+
+        <div id="quizScreen" class="quiz-container">
+            <div class="progress-bar">
+                <div class="progress" id="progressBar"></div>
+            </div>
+            
+            <div id="questionContainer"></div>
+            
+            <div class="navigation">
+                <button class="btn" id="prevBtn" onclick="previousQuestion()" disabled>Назад</button>
+                <span class="question-counter" id="questionCounter">1 / 20</span>
+                <button class="btn" id="nextBtn" onclick="nextQuestion()" disabled>Далі</button>
+            </div>
+        </div>
+
+        <div id="resultScreen" class="quiz-container">
+            <div class="result-screen">
+                <h2>Тест завершено!</h2>
+                <p style="margin: 20px 0;">Ваш результат надсилається в бот...</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const questions = [
+            {
+                question: "Чи буває таке, що ви робите щось «на відчутті», «на інтуїції», і це виявляється правильним?",
+                options: ["Дуже рідко", "Час від часу", "Дуже часто"]
+            },
+            {
+                question: "Як поводяться з вами тварини?",
+                options: ["Іноді підходять", "Часто шукають контакт", "Завжди тягнуться й довіряють"]
+            },
+            {
+                question: "Чи трапляється, що твої перші враження про людину підтверджуються?",
+                options: ["Іноді", "Досить часто", "Завжди"]
+            },
+            {
+                question: "Чи відчуваєш ти сильну втому після спілкування з певними людьми?",
+                options: ["Рідко", "Час від часу", "Дуже часто"]
+            },
+            {
+                question: "Чи бувало таке, що ти попереджав когось «не йди туди» або «зроби по-іншому» — і виявився правим?",
+                options: ["Дуже рідко", "Іноді", "Часто"]
+            },
+            {
+                question: "Чи часто люди самі починають розмову з тобою у транспорті чи черзі?",
+                options: ["Рідко", "Іноді", "Постійно"]
+            },
+            {
+                question: "Чи трапляється, що ви часто бачите одні й ті самі числа чи символи?",
+                options: ["Іноді", "Часто", "Постійно"]
+            },
+            {
+                question: "Чи здається тобі, що ти швидко «зчитуєш» людей — хто щирий, а хто ні?",
+                options: ["Лише з близькими", "Досить часто", "Майже завжди"]
+            },
+            {
+                question: "Чи буває таке, що ти говориш думку, а потім хтось повторює її вголос, ніби прочитав у тебе в голові?",
+                options: ["Рідко", "Час від часу", "Часто"]
+            },
+            {
+                question: "Чи буває, що тобі складно перебувати у натовпі через «перевантаження» від людей?",
+                options: ["Рідко", "Час від часу", "Дуже часто"]
+            },
+            {
+                question: "Як поводяться з вами маленькі діти?",
+                options: ["Іноді усміхаються", "Часто тягнуться", "Завжди шукають увагу"]
+            },
+            {
+                question: "Чи відчуваєш ти сильний дискомфорт поруч із людьми, які агресивні або нещирі?",
+                options: ["Рідко", "Час від часу", "Дуже сильно"]
+            },
+            {
+                question: "Чи кажуть люди, що біля тебе їм стає спокійніше?",
+                options: ["Іноді", "Часто", "Дуже часто"]
+            },
+            {
+                question: "Чи буває таке, що сни виглядають як справжні події, і ви довго їх пам'ятаєте?",
+                options: ["Рідко", "Час від часу", "Дуже часто"]
+            },
+            {
+                question: "Чи траплялось, що складна ситуація вирішувалась для вас «дивним чином»?",
+                options: ["Дуже рідко", "Іноді", "Часто"]
+            },
+            {
+                question: "Чи часто ви «випадково» зустрічаєте людей, про яких щойно думали?",
+                options: ["Рідко", "Іноді", "Дуже часто"]
+            },
+            {
+                question: "Чи буває, що незнайомі люди діляться з вами особистим без причини?",
+                options: ["Рідко", "Час від часу", "Постійно"]
+            },
+            {
+                question: "Чи часто з вами трапляються «дивні збіги»?",
+                options: ["Рідко", "Іноді", "Постійно"]
+            },
+            {
+                question: "Чи буває таке, що незнайомці питають у вас дорогу, час або інші дрібниці частіше, ніж у інших?",
+                options: ["Рідко", "Іноді", "Постійно"]
+            },
+            {
+                question: "Чи помічали ви, що токсичні або агресивні люди швидко дратуються поруч із вами?",
+                options: ["Рідко", "Іноді", "Дуже часто"]
+            }
+        ];
+
+        let currentQuestion = 0;
+        let answers = [];
+        let totalScore = 0;
+
+        // Ініціалізація Telegram WebApp
+        let tg = window.Telegram.WebApp;
+        tg.expand();
+
+        function startQuiz() {
+            document.getElementById('startScreen').classList.remove('active');
+            document.getElementById('quizScreen').classList.add('active');
+            showQuestion();
+        }
+
+        function showQuestion() {
+            const question = questions[currentQuestion];
+            const container = document.getElementById('questionContainer');
+            
+            container.innerHTML = `
+                <div class="question">
+                    <h3>${question.question}</h3>
+                    <div class="options">
+                        ${question.options.map((option, index) => `
+                            <button class="option" onclick="selectOption(${index})">${option}</button>
+                        `).join('')}
+                    </div>
+                </div>
+            `;
+            
+            updateProgress();
+            updateNavigation();
+        }
+
+        function selectOption(optionIndex) {
+            const options = document.querySelectorAll('.option');
+            options.forEach(option => option.classList.remove('selected'));
+            options[optionIndex].classList.add('selected');
+            
+            answers[currentQuestion] = optionIndex + 1; // 1, 2, 3 бали
+            document.getElementById('nextBtn').disabled = false;
+        }
+
+        function nextQuestion() {
+            if (answers[currentQuestion] === undefined) return;
+            
+            if (currentQuestion < questions.length - 1) {
+                currentQuestion++;
+                showQuestion();
+            } else {
+                finishQuiz();
+            }
+        }
+
+        function previousQuestion() {
+            if (currentQuestion > 0) {
+                currentQuestion--;
+                showQuestion();
+            }
+        }
+
+        function updateProgress() {
+            const progress = ((currentQuestion + 1) / questions.length) * 100;
+            document.getElementById('progressBar').style.width = progress + '%';
+            document.getElementById('questionCounter').textContent = `${currentQuestion + 1} / ${questions.length}`;
+        }
+
+        function updateNavigation() {
+            document.getElementById('prevBtn').disabled = currentQuestion === 0;
+            document.getElementById('nextBtn').disabled = answers[currentQuestion] === undefined;
+            
+            if (currentQuestion === questions.length - 1) {
+                document.getElementById('nextBtn').textContent = 'Завершити';
+            } else {
+                document.getElementById('nextBtn').textContent = 'Далі';
+            }
+        }
+
+        function finishQuiz() {
+            // Підрахунок балів
+            totalScore = answers.reduce((sum, answer) => sum + answer, 0);
+            
+            // Показ екрану завершення
+            document.getElementById('quizScreen').classList.remove('active');
+            document.getElementById('resultScreen').classList.add('active');
+            
+            // Відправка результатів в бот
+            tg.sendData(JSON.stringify({
+                score: totalScore,
+                answers: answers,
+                timestamp: new Date().toISOString()
+            }));
+        }
+
+        // Ініціалізація
+        document.getElementById('startScreen').classList.add('active');
+    </script>
+</body>
+</html>
