@@ -363,21 +363,61 @@
             }
         }
 
-        function finishQuiz() {
-            // Підрахунок балів
-            totalScore = answers.reduce((sum, answer) => sum + answer, 0);
-            
-            // Показ екрану завершення
-            document.getElementById('quizScreen').classList.remove('active');
-            document.getElementById('resultScreen').classList.add('active');
-            
-            // Відправка результатів в бот
-            tg.sendData(JSON.stringify({
-                score: totalScore,
-                answers: answers,
-                timestamp: new Date().toISOString()
-            }));
-        }
+       function finishQuiz() {
+    // Підрахунок балів
+    totalScore = answers.reduce((sum, answer) => sum + answer, 0);
+    
+    // Показ екрану завершення  
+    document.getElementById('quizScreen').classList.remove('active');
+    document.getElementById('resultScreen').classList.add('active');
+    
+    // Визначення результату для показу
+    let resultTitle, resultText;
+    if (totalScore >= 20 && totalScore <= 30) {
+        resultTitle = "Прихований потенціал";
+        resultText = "У тебе є базові здібності, які варто розвивати.";
+    } else if (totalScore >= 31 && totalScore <= 45) {
+        resultTitle = "Помірні здібності";  
+        resultText = "Ти вже добре відчуваєш світ навколо себе.";
+    } else if (totalScore >= 46 && totalScore <= 55) {
+        resultTitle = "Сильні здібності";
+        resultText = "У тебе яскраво проявлені інтуїтивні здібності.";
+    } else {
+        resultTitle = "Виняткові здібності";
+        resultText = "Ти дуже чутлива та інтуїтивна людина.";
+    }
+    
+    // Відображення результату
+    document.getElementById('resultScreen').innerHTML = `
+        <div class="result-screen">
+            <div class="mystical-icon">🌟</div>
+            <h2>${resultTitle}</h2>
+            <div class="score">${Math.round((totalScore/60)*100)}%</div>
+            <p style="margin: 20px 0;">${resultText}</p>
+            <button class="btn" onclick="getBotResult()" style="margin: 10px; width: 80%;">
+                📱 Отримати детальний результат в боті
+            </button>
+            <button class="btn" onclick="restartQuiz()" style="margin: 10px; width: 80%;">
+                🔄 Пройти тест знову
+            </button>
+        </div>
+    `;
+}
+
+// Функція для переходу в бот з результатом
+function getBotResult() {
+    const botUrl = `https://t.me/molfarTAROtest_bot?start=result_${totalScore}`;
+    window.open(botUrl, '_blank');
+}
+
+// Функція рестарту
+function restartQuiz() {
+    currentQuestion = 0;
+    answers = [];
+    totalScore = 0;
+    document.getElementById('resultScreen').classList.remove('active');
+    document.getElementById('startScreen').classList.add('active');
+}
 
         // Ініціалізація
         document.getElementById('startScreen').classList.add('active');
