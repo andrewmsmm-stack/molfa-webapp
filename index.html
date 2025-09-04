@@ -366,6 +366,11 @@ function finishQuiz() {
     // Підрахунок балів
     totalScore = answers.reduce((sum, answer) => sum + answer, 0);
     
+    // Зберігаємо в глобальну змінну для доступу пізніше
+    window.quizScore = totalScore;
+    
+    console.log('Quiz finished with score:', totalScore); // Для дебагу
+    
     // Показ екрану завершення  
     document.getElementById('quizScreen').classList.remove('active');
     document.getElementById('resultScreen').classList.add('active');
@@ -391,8 +396,22 @@ function finishQuiz() {
 
 // Функція для переходу в бот з результатом
 function getBotResult() {
+    // Перевіряємо, чи є збережені бали
+    if (typeof totalScore === 'undefined' || totalScore === 0) {
+        // Якщо балів немає, підраховуємо знову
+        totalScore = answers.reduce((sum, answer) => sum + answer, 0);
+    }
+    
+    console.log('Total score:', totalScore); // Для дебагу
     const botUrl = `https://t.me/molfarTAROtest_bot?start=result_${totalScore}`;
-    window.open(botUrl, '_blank');
+    console.log('Bot URL:', botUrl); // Для дебагу
+    
+    // Відкриваємо бота з результатом
+    if (window.Telegram && window.Telegram.WebApp) {
+        window.Telegram.WebApp.openTelegramLink(botUrl);
+    } else {
+        window.open(botUrl, '_blank');
+    }
 }
 
 // Функція рестарту
