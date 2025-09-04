@@ -3,201 +3,217 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Тест: Чи є у тебе здібності?</title>
-    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <title>Чи є у тебе здібності?</title>
     <style>
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
         }
-        
+
         body {
             font-family: 'Arial', sans-serif;
-            background: linear-gradient(135deg, #1a4c2e 0%, #2d7a47 50%, #1e5233 100%);
-            background-attachment: fixed;
-            margin: 0;
-            padding: 20px;
+            background: linear-gradient(135deg, #1a4c2e, #2d7a47);
             min-height: 100vh;
-            color: #ffffff;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            padding: 20px;
         }
-        
-        .container {
-            max-width: 800px;
-            margin: 0 auto;
-            background: rgba(26, 76, 46, 0.9);
+
+        .quiz-container {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
             border-radius: 20px;
             padding: 30px;
+            max-width: 600px;
+            width: 100%;
             box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
-            border: 1px solid rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
         }
-        
-        .header {
+
+        .start-screen {
             text-align: center;
+        }
+
+        .title {
+            font-size: 2.5em;
+            margin-bottom: 20px;
+            background: linear-gradient(45deg, #fff, #b8d4c2);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .subtitle {
+            font-size: 1.2em;
             margin-bottom: 30px;
+            opacity: 0.9;
         }
-        
-        .header h1 {
-            color: #ffffff;
-            font-size: 2.2em;
-            margin: 0 0 10px 0;
-            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
-        }
-        
-        .quiz-container {
+
+        .quiz-content {
             display: none;
         }
-        
-        .quiz-container.active {
-            display: block;
+
+        .progress-bar {
+            width: 100%;
+            height: 10px;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 5px;
+            margin-bottom: 30px;
+            overflow: hidden;
         }
-        
+
+        .progress {
+            height: 100%;
+            background: linear-gradient(90deg, #4CAF50, #81C784);
+            border-radius: 5px;
+            transition: width 0.3s ease;
+        }
+
+        .question-counter {
+            text-align: center;
+            margin-bottom: 20px;
+            font-size: 1.1em;
+            opacity: 0.8;
+        }
+
         .question {
-            background: linear-gradient(135deg, rgba(45, 122, 71, 0.8) 0%, rgba(26, 76, 46, 0.9) 100%);
-            color: white;
-            padding: 25px;
-            border-radius: 15px;
-            margin-bottom: 25px;
-            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-        }
-        
-        .question h3 {
-            margin: 0 0 20px 0;
             font-size: 1.3em;
+            margin-bottom: 25px;
+            text-align: center;
             line-height: 1.4;
         }
-        
+
         .options {
-            display: grid;
+            display: flex;
+            flex-direction: column;
             gap: 15px;
+            margin-bottom: 30px;
         }
-        
+
         .option {
             background: rgba(255, 255, 255, 0.1);
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            padding: 15px;
-            border-radius: 10px;
-            color: white;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            border-radius: 15px;
+            padding: 20px;
             cursor: pointer;
             transition: all 0.3s ease;
-            text-align: left;
-            font-size: 1em;
+            text-align: center;
+            font-size: 1.1em;
         }
-        
+
         .option:hover {
             background: rgba(255, 255, 255, 0.2);
-            transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(255, 255, 255, 0.1);
-        }
-        
-        .option.selected {
-            background: rgba(255, 255, 255, 0.3);
             border-color: rgba(255, 255, 255, 0.5);
-            box-shadow: 0 0 20px rgba(255, 255, 255, 0.2);
+            transform: translateY(-2px);
         }
-        
+
+        .option.selected {
+            background: rgba(76, 175, 80, 0.3);
+            border-color: #4CAF50;
+        }
+
         .navigation {
             display: flex;
             justify-content: space-between;
-            align-items: center;
             margin-top: 30px;
         }
-        
+
         .btn {
-            padding: 12px 30px;
-            border: 2px solid rgba(255, 255, 255, 0.3);
+            background: linear-gradient(45deg, #4CAF50, #66BB6A);
+            border: none;
             border-radius: 25px;
-            cursor: pointer;
-            font-size: 1em;
-            font-weight: bold;
-            transition: all 0.3s ease;
-            background: rgba(255, 255, 255, 0.1);
+            padding: 15px 30px;
             color: white;
+            font-size: 1.1em;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 5px 15px rgba(76, 175, 80, 0.3);
         }
-        
+
         .btn:hover {
-            background: rgba(255, 255, 255, 0.2);
             transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(76, 175, 80, 0.4);
         }
-        
+
         .btn:disabled {
             opacity: 0.5;
             cursor: not-allowed;
             transform: none;
         }
-        
-        .progress-bar {
-            width: 100%;
-            height: 8px;
-            background: rgba(255, 255, 255, 0.2);
-            border-radius: 4px;
-            margin: 20px 0;
-            overflow: hidden;
+
+        .btn-secondary {
+            background: rgba(255, 255, 255, 0.1);
+            border: 2px solid rgba(255, 255, 255, 0.3);
         }
-        
-        .progress {
-            height: 100%;
-            background: linear-gradient(90deg, #4CAF50 0%, #8BC34A 100%);
-            transition: width 0.3s ease;
-            border-radius: 4px;
-        }
-        
-        .start-screen, .result-screen {
+
+        .result-screen {
+            display: none;
             text-align: center;
-            padding: 40px 20px;
         }
-        
-        .mystical-icon {
-            font-size: 4em;
+
+        .result-title {
+            font-size: 2em;
             margin-bottom: 20px;
-            animation: float 3s ease-in-out infinite;
+            color: #4CAF50;
         }
-        
-        @keyframes float {
-            0%, 100% { transform: translateY(0px); }
-            50% { transform: translateY(-15px); }
+
+        .result-buttons {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            margin-top: 30px;
         }
-        
-        .question-counter {
-            color: rgba(255, 255, 255, 0.8);
-            font-size: 1.1em;
-            font-weight: 600;
+
+        @media (max-width: 768px) {
+            .quiz-container {
+                padding: 20px;
+                margin: 10px;
+            }
+
+            .title {
+                font-size: 2em;
+            }
+
+            .question {
+                font-size: 1.2em;
+            }
         }
     </style>
 </head>
 <body>
-    <div class="container">
-        <div class="header">
-            <div class="mystical-icon">🔮</div>
-            <h1>Чи є у тебе здібності?</h1>
-        </div>
-
-        <div id="startScreen" class="start-screen">
-            <p style="font-size: 1.2em; margin-bottom: 30px; opacity: 0.9;">
-                Дізнайся про свої приховані здібності через 20 запитань
-            </p>
+    <div class="quiz-container">
+        <!-- Початковий екран -->
+        <div class="start-screen" id="startScreen">
+            <h1 class="title">Чи є у тебе здібності?</h1>
+            <p class="subtitle">Дізнайся про свої приховані здібності через 13 запитань</p>
             <button class="btn" onclick="startQuiz()">Розпочати тест</button>
         </div>
 
-        <div id="quizScreen" class="quiz-container">
+        <!-- Екран квізу -->
+        <div class="quiz-content" id="quizContent">
             <div class="progress-bar">
                 <div class="progress" id="progressBar"></div>
             </div>
-            
-            <div id="questionContainer"></div>
-            
+            <div class="question-counter" id="questionCounter"></div>
+            <div class="question" id="questionText"></div>
+            <div class="options" id="optionsContainer"></div>
             <div class="navigation">
-                <button class="btn" id="prevBtn" onclick="previousQuestion()" disabled>Назад</button>
-                <span class="question-counter" id="questionCounter">1 / 20</span>
+                <button class="btn btn-secondary" id="prevBtn" onclick="previousQuestion()" style="display: none;">Назад</button>
                 <button class="btn" id="nextBtn" onclick="nextQuestion()" disabled>Далі</button>
             </div>
         </div>
 
-        <div id="resultScreen" class="quiz-container">
-            <div class="result-screen">
-                <h2>Тест завершено!</h2>
-                <p style="margin: 20px 0;">Ваш результат надсилається в бот...</p>
+        <!-- Екран результату -->
+        <div class="result-screen" id="resultScreen">
+            <h2 class="result-title">Тест завершено!</h2>
+            <p>Ваш результат надсилається в бот...</p>
+            <div class="result-buttons">
+                <button class="btn" onclick="getBotResult()">Отримати результат в боті</button>
+                <button class="btn btn-secondary" onclick="restartQuiz()">Пройти ще раз</button>
             </div>
         </div>
     </div>
@@ -217,28 +233,12 @@
                 options: ["Іноді", "Досить часто", "Завжди"]
             },
             {
-                question: "Чи відчуваєш ти сильну втому після спілкування з певними людьми?",
-                options: ["Рідко", "Час від часу", "Дуже часто"]
-            },
-            {
-                question: "Чи бувало таке, що ти попереджав когось «не йди туди» або «зроби по-іншому» — і виявився правим?",
-                options: ["Дуже рідко", "Іноді", "Часто"]
-            },
-            {
-                question: "Чи часто люди самі починають розмову з тобою у транспорті чи черзі?",
-                options: ["Рідко", "Іноді", "Постійно"]
-            },
-            {
                 question: "Чи трапляється, що ви часто бачите одні й ті самі числа чи символи?",
                 options: ["Іноді", "Часто", "Постійно"]
             },
             {
                 question: "Чи здається тобі, що ти швидко «зчитуєш» людей — хто щирий, а хто ні?",
                 options: ["Лише з близькими", "Досить часто", "Майже завжди"]
-            },
-            {
-                question: "Чи буває таке, що ти говориш думку, а потім хтось повторює її вголос, ніби прочитав у тебе в голові?",
-                options: ["Рідко", "Час від часу", "Часто"]
             },
             {
                 question: "Чи буває, що тобі складно перебувати у натовпі через «перевантаження» від людей?",
@@ -257,7 +257,7 @@
                 options: ["Іноді", "Часто", "Дуже часто"]
             },
             {
-                question: "Чи буває таке, що сни виглядають як справжні події, і ви довго їх пам'ятаєте?",
+                question: "Чи буває таке, що сни відчуваються як справжні події та надто реалістично?",
                 options: ["Рідко", "Час від часу", "Дуже часто"]
             },
             {
@@ -269,20 +269,8 @@
                 options: ["Рідко", "Іноді", "Дуже часто"]
             },
             {
-                question: "Чи буває, що незнайомі люди діляться з вами особистим без причини?",
-                options: ["Рідко", "Час від часу", "Постійно"]
-            },
-            {
                 question: "Чи часто з вами трапляються «дивні збіги»?",
                 options: ["Рідко", "Іноді", "Постійно"]
-            },
-            {
-                question: "Чи буває таке, що незнайомці питають у вас дорогу, час або інші дрібниці частіше, ніж у інших?",
-                options: ["Рідко", "Іноді", "Постійно"]
-            },
-            {
-                question: "Чи помічали ви, що токсичні або агресивні люди швидко дратуються поруч із вами?",
-                options: ["Рідко", "Іноді", "Дуже часто"]
             }
         ];
 
@@ -290,47 +278,42 @@
         let answers = [];
         let totalScore = 0;
 
-        // Ініціалізація Telegram WebApp
-        let tg = window.Telegram.WebApp;
-        tg.expand();
-
         function startQuiz() {
-            document.getElementById('startScreen').classList.remove('active');
-            document.getElementById('quizScreen').classList.add('active');
+            document.getElementById('startScreen').style.display = 'none';
+            document.getElementById('quizContent').style.display = 'block';
             showQuestion();
         }
 
         function showQuestion() {
             const question = questions[currentQuestion];
-            const container = document.getElementById('questionContainer');
+            document.getElementById('questionCounter').textContent = `Питання ${currentQuestion + 1} з ${questions.length}`;
+            document.getElementById('questionText').textContent = question.question;
             
-            container.innerHTML = `
-                <div class="question">
-                    <h3>${question.question}</h3>
-                    <div class="options">
-                        ${question.options.map((option, index) => `
-                            <button class="option" onclick="selectOption(${index})">${option}</button>
-                        `).join('')}
-                    </div>
-                </div>
-            `;
+            const optionsContainer = document.getElementById('optionsContainer');
+            optionsContainer.innerHTML = '';
+            
+            question.options.forEach((option, index) => {
+                const optionDiv = document.createElement('div');
+                optionDiv.className = 'option';
+                optionDiv.textContent = option;
+                optionDiv.onclick = () => selectOption(index + 1, optionDiv);
+                optionsContainer.appendChild(optionDiv);
+            });
             
             updateProgress();
             updateNavigation();
         }
 
-        function selectOption(optionIndex) {
-            const options = document.querySelectorAll('.option');
-            options.forEach(option => option.classList.remove('selected'));
-            options[optionIndex].classList.add('selected');
+        function selectOption(value, element) {
+            // Видаляємо попередній вибір
+            document.querySelectorAll('.option').forEach(opt => opt.classList.remove('selected'));
+            element.classList.add('selected');
             
-            answers[currentQuestion] = optionIndex + 1; // 1, 2, 3 бали
+            answers[currentQuestion] = value;
             document.getElementById('nextBtn').disabled = false;
         }
 
         function nextQuestion() {
-            if (answers[currentQuestion] === undefined) return;
-            
             if (currentQuestion < questions.length - 1) {
                 currentQuestion++;
                 showQuestion();
@@ -343,91 +326,44 @@
             if (currentQuestion > 0) {
                 currentQuestion--;
                 showQuestion();
+                document.getElementById('nextBtn').disabled = answers[currentQuestion] === undefined;
             }
         }
 
         function updateProgress() {
             const progress = ((currentQuestion + 1) / questions.length) * 100;
             document.getElementById('progressBar').style.width = progress + '%';
-            document.getElementById('questionCounter').textContent = `${currentQuestion + 1} / ${questions.length}`;
         }
 
         function updateNavigation() {
-            document.getElementById('prevBtn').disabled = currentQuestion === 0;
-            document.getElementById('nextBtn').disabled = answers[currentQuestion] === undefined;
+            const prevBtn = document.getElementById('prevBtn');
+            const nextBtn = document.getElementById('nextBtn');
             
-            if (currentQuestion === questions.length - 1) {
-                document.getElementById('nextBtn').textContent = 'Завершити';
-            } else {
-                document.getElementById('nextBtn').textContent = 'Далі';
-            }
+            prevBtn.style.display = currentQuestion > 0 ? 'block' : 'none';
+            nextBtn.textContent = currentQuestion === questions.length - 1 ? 'Завершити' : 'Далі';
+            nextBtn.disabled = answers[currentQuestion] === undefined;
         }
-function finishQuiz() {
-    // Підрахунок балів
-    totalScore = answers.reduce((sum, answer) => sum + answer, 0);
-    
-    // Зберігаємо в глобальну змінну для доступу пізніше
-    window.quizScore = totalScore;
-    
-    console.log('Quiz finished with score:', totalScore); // Для дебагу
-    
-    // Показ екрану завершення  
-    document.getElementById('quizScreen').classList.remove('active');
-    document.getElementById('resultScreen').classList.add('active');
-    
-    // Відображення тільки кнопок без результатів
-    document.getElementById('resultScreen').innerHTML = `
-        <div class="result-screen">
-            <div class="mystical-icon">🔮</div>
-            <h2>Тест завершено!</h2>
-            <p style="margin: 20px 0; opacity: 0.9;">
-                Дякуємо за проходження тесту.<br>
-                Отримайте детальний результат в боті.
-            </p>
-            <button class="btn" onclick="getBotResult()" style="margin: 10px; width: 80%;">
-                📱 Отримати результат в боті
-            </button>
-            <button class="btn" onclick="restartQuiz()" style="margin: 10px; width: 80%;">
-                🔄 Пройти тест знову
-            </button>
-        </div>
-    `;
-}
 
-// Функція для переходу в бот з результатом
-function getBotResult() {
-    // Перевіряємо, чи є збережені бали
-    if (typeof totalScore === 'undefined' || totalScore === 0) {
-        // Якщо балів немає, підраховуємо знову
-        totalScore = answers.reduce((sum, answer) => sum + answer, 0);
-    }
-    
-    console.log('Total score:', totalScore); // Для дебагу
-    const botUrl = `https://t.me/molfarTAROtest_bot?start=result_${totalScore}`;
-    console.log('Bot URL:', botUrl); // Для дебагу
-    
-    // Відкриваємо бота з результатом
-    if (window.Telegram && window.Telegram.WebApp) {
-        window.Telegram.WebApp.openTelegramLink(botUrl);
-    } else {
-        window.open(botUrl, '_blank');
-    }
-}
+        function finishQuiz() {
+            totalScore = answers.reduce((sum, answer) => sum + answer, 0);
+            
+            document.getElementById('quizContent').style.display = 'none';
+            document.getElementById('resultScreen').style.display = 'block';
+        }
 
-// Функція рестарту
-function restartQuiz() {
-    currentQuestion = 0;
-    answers = [];
-    totalScore = 0;
-    document.getElementById('resultScreen').classList.remove('active');
-    document.getElementById('startScreen').classList.add('active');
-}
-      
-   
+        function getBotResult() {
+            const botUrl = `https://t.me/molfarTAROtest_bot?start=result_${totalScore}`;
+            window.open(botUrl, '_blank');
+        }
 
-
-        // Ініціалізація
-        document.getElementById('startScreen').classList.add('active');
+        function restartQuiz() {
+            currentQuestion = 0;
+            answers = [];
+            totalScore = 0;
+            
+            document.getElementById('resultScreen').style.display = 'none';
+            document.getElementById('startScreen').style.display = 'block';
+        }
     </script>
 </body>
 </html>
