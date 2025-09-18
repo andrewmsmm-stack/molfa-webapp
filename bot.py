@@ -139,10 +139,10 @@ async def handle_quiz_result(message: types.Message):
 
         # Спочатку відправляємо фото академії
         photo_urls = [
-            "https://raw.githubusercontent.com/molfartaro/molfa-webapp/main/academy-image.png",
-            "https://github.com/molfartaro/molfa-webapp/blob/main/academy-image.png?raw=true",
-            "https://molfartaro.github.io/molfa-webapp/academy-image.png"
-        ]
+    "https://raw.githubusercontent.com/molfartaro/molfa-webapp/main/academy-image-v2.png",
+    "https://github.com/molfartaro/molfa-webapp/blob/main/academy-image-v2.png?raw=true",
+    "https://molfartaro.github.io/molfa-webapp/academy-image-v2.png"
+]
         
         photo_sent = False
         for photo_url in photo_urls:
